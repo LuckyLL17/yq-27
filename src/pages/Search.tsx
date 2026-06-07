@@ -1,13 +1,26 @@
-import { useMemo } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useMemo, useState, useEffect } from 'react';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Search as SearchIcon, ArrowLeft } from 'lucide-react';
 import QuestionCard from '@/components/QuestionCard';
 import { questions } from '@/data/questions';
 import { categories } from '@/data/categories';
 
 export default function SearchPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const query = searchParams.get('q') || '';
+  const [searchInput, setSearchInput] = useState(query);
+
+  useEffect(() => {
+    setSearchInput(query);
+  }, [query]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      setSearchParams({ q: searchInput.trim() });
+    }
+  };
 
   const searchResults = useMemo(() => {
     if (!query.trim()) return [];
@@ -64,6 +77,19 @@ export default function SearchPage() {
           </span>
         </div>
 
+        <form onSubmit={handleSearch} className="mb-8">
+          <div className="relative">
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="输入关键词搜索题目、解法、坑点..."
+              className="w-full pl-12 pr-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder:text-dark-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors text-base"
+            />
+          </div>
+        </form>
+
         {searchResults.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {searchResults.map((question) => {
@@ -73,7 +99,7 @@ export default function SearchPage() {
                   <QuestionCard
                     question={{
                       ...question,
-                      title: highlightText(question.title, query) as unknown as string,
+                      title: highlightText(question.title, query),
                     }}
                     showCategory
                     categoryName={category?.name}

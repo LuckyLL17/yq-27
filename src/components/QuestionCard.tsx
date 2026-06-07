@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Flame } from 'lucide-react';
 import { Question } from '../types';
@@ -18,7 +19,7 @@ const difficultyConfig = {
 };
 
 interface QuestionCardProps {
-  question: Question;
+  question: Omit<Question, 'title'> & { title: ReactNode };
   showCategory?: boolean;
   categoryName?: string;
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Children } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -79,9 +79,10 @@ export default function QuestionDetail() {
         } else {
           const lastUl = elements[elements.length - 1] as React.ReactElement;
           if (lastUl && lastUl.type === 'ul') {
+            const childrenArray = Children.toArray(lastUl.props.children);
             elements[elements.length - 1] = (
               <ul key={`ul-${index}`} className="list-disc list-inside space-y-1 text-dark-300">
-                {...lastUl.props.children}
+                {childrenArray}
                 <li>{line.slice(2)}</li>
               </ul>
             );
