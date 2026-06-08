@@ -4,6 +4,9 @@ import Home from "@/pages/Home";
 import Category from "@/pages/Category";
 import QuestionDetail from "@/pages/QuestionDetail";
 import SearchPage from "@/pages/Search";
+import ExamConfigPage from "@/pages/ExamConfig";
+import ExamTakePage from "@/pages/ExamTake";
+import ExamResultPage from "@/pages/ExamResult";
 
 export default function App() {
   return (
@@ -16,6 +19,9 @@ export default function App() {
             <Route path="/category/:categoryId" element={<Category />} />
             <Route path="/question/:questionId" element={<QuestionDetail />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/exam/config" element={<ExamConfigPage />} />
+            <Route path="/exam/take" element={<ExamTakePage />} />
+            <Route path="/exam/result" element={<ExamResultPage />} />
           </Routes>
         </main>
         <footer className="border-t border-dark-700 py-8 mt-auto">

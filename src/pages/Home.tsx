@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Sparkles, Target, BookOpen, TrendingUp, ChevronRight } from 'lucide-react';
+import { Search, Sparkles, Target, BookOpen, TrendingUp, ChevronRight, ClipboardList, Clock } from 'lucide-react';
 import CategoryCard from '@/components/CategoryCard';
 import QuestionCard from '@/components/QuestionCard';
 import { categories } from '@/data/categories';
@@ -106,6 +106,50 @@ export default function Home() {
               <div className="text-sm text-dark-400">{stat.label}</div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* 模拟考试入口 */}
+      <section className="container mx-auto px-4 mb-16">
+        <div
+          className="relative overflow-hidden bg-gradient-to-r from-primary-600/20 via-primary-500/10 to-cyan-500/20 border border-primary-500/30 rounded-3xl p-8 md:p-10 cursor-pointer group hover:border-primary-400/50 transition-colors"
+          onClick={() => navigate('/exam/config')}
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+
+          <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ClipboardList className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">模拟考试</h2>
+                <p className="text-dark-300 max-w-md">
+                  自定义难度和题量，模拟真实面试场景，检验你的学习成果
+                </p>
+                <div className="flex items-center gap-4 mt-3 text-sm text-dark-400">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4" />
+                    计时答题
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Target className="w-4 h-4" />
+                    智能评分
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <BookOpen className="w-4 h-4" />
+                    答案解析
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <button className="flex items-center gap-2 px-6 py-3 bg-white text-dark-900 font-semibold rounded-xl hover:bg-dark-100 transition-colors group-hover:shadow-lg group-hover:shadow-primary-500/20">
+              开始考试
+              <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
         </div>
       </section>
 

@@ -2,6 +2,8 @@ export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export type Severity = 'high' | 'medium' | 'low';
 
+export type ExamStatus = 'idle' | 'configuring' | 'ongoing' | 'finished';
+
 export interface Category {
   id: string;
   name: string;
@@ -33,4 +35,28 @@ export interface Question {
   codeExamples: CodeExample[];
   relatedQuestionIds: string[];
   isHot: boolean;
+}
+
+export interface ExamConfig {
+  categoryId: string;
+  difficulty: Difficulty | 'all';
+  questionCount: number;
+  duration: number;
+}
+
+export interface ExamQuestion {
+  question: Question;
+  userAnswer: string;
+  isAnswered: boolean;
+  isMarked: boolean;
+}
+
+export interface ExamResult {
+  totalQuestions: number;
+  correctCount: number;
+  wrongCount: number;
+  unansweredCount: number;
+  score: number;
+  timeSpent: number;
+  answers: ExamQuestion[];
 }
