@@ -6,6 +6,7 @@ import { QuestionListSkeleton } from '@/components/QuestionCardSkeleton';
 import { categories } from '@/data/categories';
 import { questions } from '@/data/questions';
 import { Difficulty } from '@/types';
+import { difficultyConfig } from '@/config';
 
 export default function Category() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -35,9 +36,9 @@ export default function Category() {
 
   const difficultyOptions = [
     { value: 'all', label: '全部', count: questions.filter(q => q.categoryId === categoryId).length },
-    { value: 'easy', label: '简单', count: questions.filter(q => q.categoryId === categoryId && q.difficulty === 'easy').length },
-    { value: 'medium', label: '中等', count: questions.filter(q => q.categoryId === categoryId && q.difficulty === 'medium').length },
-    { value: 'hard', label: '困难', count: questions.filter(q => q.categoryId === categoryId && q.difficulty === 'hard').length },
+    { value: 'easy', label: difficultyConfig.easy.label, count: questions.filter(q => q.categoryId === categoryId && q.difficulty === 'easy').length },
+    { value: 'medium', label: difficultyConfig.medium.label, count: questions.filter(q => q.categoryId === categoryId && q.difficulty === 'medium').length },
+    { value: 'hard', label: difficultyConfig.hard.label, count: questions.filter(q => q.categoryId === categoryId && q.difficulty === 'hard').length },
   ];
 
   if (!category) {

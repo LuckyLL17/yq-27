@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Coffee,
-  Database,
-  Zap,
   Clock,
   BookOpen,
   Calendar,
@@ -12,30 +9,12 @@ import {
   RotateCcw,
   Trophy,
   TrendingUp,
-  Code2,
-  Terminal,
-  Braces,
 } from 'lucide-react';
 import { learningPaths } from '@/data/learningPaths';
 import { useLearningPathStore } from '@/store/useLearningPathStore';
 import { LearningPath } from '@/types';
 import { PathListSkeleton } from '@/components/PathCardSkeleton';
-
-const iconMap: Record<string, React.ReactNode> = {
-  coffee: <Coffee className="w-7 h-7" />,
-  'code-2': <Code2 className="w-7 h-7" />,
-  terminal: <Terminal className="w-7 h-7" />,
-  braces: <Braces className="w-7 h-7" />,
-  database: <Database className="w-7 h-7" />,
-  zap: <Zap className="w-7 h-7" />,
-};
-
-const levelLabels: Record<string, { label: string; color: string }> = {
-  beginner: { label: '入门', color: 'bg-green-500/10 text-green-400 border-green-500/30' },
-  intermediate: { label: '进阶', color: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
-  advanced: { label: '高级', color: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
-  all: { label: '全级别', color: 'bg-gray-500/10 text-gray-400 border-gray-500/30' },
-};
+import { iconMap, pathLevelConfig } from '@/config';
 
 interface PathCardProps {
   path: LearningPath;
@@ -48,7 +27,7 @@ interface PathCardProps {
 
 function PathCard({ path, progress, isActive, onStart, onContinue, onReset }: PathCardProps) {
   const navigate = useNavigate();
-  const levelInfo = levelLabels[path.level] || levelLabels.all;
+  const levelInfo = pathLevelConfig[path.level as keyof typeof pathLevelConfig] || pathLevelConfig.all;
 
   const totalSteps = path.phases.reduce((sum, phase) => sum + phase.steps.length, 0);
   const completedSteps = Math.round((progress / 100) * totalSteps);
@@ -66,7 +45,10 @@ function PathCard({ path, progress, isActive, onStart, onContinue, onReset }: Pa
       <div className="p-7">
         <div className="flex items-start gap-5 mb-5">
           <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${path.gradient} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
-            {iconMap[path.icon] || <BookOpen className="w-7 h-7" />}
+            {(() => {
+              const Icon = iconMap[path.icon] || BookOpen;
+              return <Icon className="w-7 h-7" />;
+            })()}
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">

@@ -1,17 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Coffee, Database, Zap, MessageSquare, LayoutGrid, Code2, Terminal, Braces } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
 import { Category } from '../types';
-
-const iconMap: Record<string, React.ReactNode> = {
-  coffee: <Coffee className="w-6 h-6" />,
-  'code-2': <Code2 className="w-6 h-6" />,
-  terminal: <Terminal className="w-6 h-6" />,
-  braces: <Braces className="w-6 h-6" />,
-  database: <Database className="w-6 h-6" />,
-  zap: <Zap className="w-6 h-6" />,
-  'message-square': <MessageSquare className="w-6 h-6" />,
-  'layout-grid': <LayoutGrid className="w-6 h-6" />,
-};
+import { iconMap } from '@/config';
 
 interface CategoryCardProps {
   category: Category;
@@ -28,7 +18,10 @@ export default function CategoryCard({ category }: CategoryCardProps) {
           className="w-14 h-14 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
           style={{ backgroundColor: `${category.color}20`, color: category.color }}
         >
-          {iconMap[category.icon] || <LayoutGrid className="w-6 h-6" />}
+          {(() => {
+            const Icon = iconMap[category.icon] || LayoutGrid;
+            return <Icon className="w-6 h-6" />;
+          })()}
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-white group-hover:text-primary-400 transition-colors">

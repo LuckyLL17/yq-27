@@ -9,6 +9,8 @@ export interface ScoreDetail {
   level: 'excellent' | 'good' | 'pass' | 'fail';
 }
 
+import { scoringWeights, passScore } from '@/config';
+
 function extractKeywords(text: string): string[] {
   const lower = text.toLowerCase();
   const cnPattern = /[\u4e00-\u9fa5]{2,}/g;
@@ -202,12 +204,7 @@ export function evaluateAnswerScore(
   const depthScore = calculateDepthScore(userAnswer, standardSolution);
   const completenessScore = calculateCompletenessScore(userAnswer, questionContent);
 
-  const weights = {
-    keyword: 0.4,
-    structure: 0.2,
-    depth: 0.2,
-    completeness: 0.2,
-  };
+  const weights = scoringWeights;
 
   const totalScore = Math.round(
     keywordResult.score * weights.keyword +
@@ -219,7 +216,7 @@ export function evaluateAnswerScore(
   let level: ScoreDetail['level'] = 'fail';
   if (totalScore >= 85) level = 'excellent';
   else if (totalScore >= 70) level = 'good';
-  else if (totalScore >= 60) level = 'pass';
+  else if (totalScore >= passScore) level = 'pass';
 
   return {
     totalScore,
@@ -239,5 +236,5 @@ export function isAnswerCorrect(
   questionContent: string
 ): boolean {
   const result = evaluateAnswerScore(userAnswer, standardSolution, questionContent);
-  return result.totalScore >= 60;
+  return result.totalScore >= passScore;
 }

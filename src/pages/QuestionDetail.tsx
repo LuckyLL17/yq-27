@@ -21,6 +21,7 @@ import { questions } from '@/data/questions';
 import { categories } from '@/data/categories';
 import { useLearningPathStore } from '@/store/useLearningPathStore';
 import { learningPaths } from '@/data/learningPaths';
+import { difficultyConfig } from '@/config';
 
 export default function QuestionDetail() {
   const { questionId } = useParams<{ questionId: string }>();
@@ -111,12 +112,6 @@ export default function QuestionDetail() {
     if (nextQuestion) {
       navigate(`/question/${nextQuestion.id}`);
     }
-  };
-
-  const difficultyConfig = {
-    easy: { label: '简单', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
-    medium: { label: '中等', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
-    hard: { label: '困难', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
   };
 
   if (!question) {

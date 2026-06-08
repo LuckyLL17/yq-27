@@ -6,23 +6,7 @@ import { questions } from '@/data/questions';
 import { useExamStore } from '@/store/useExamStore';
 import { Difficulty } from '@/types';
 import { ExamConfigSkeleton } from '@/components/ExamConfigSkeleton';
-
-const difficultyOptions = [
-  { value: 'all', label: '全部难度', desc: '随机抽取各种难度题目' },
-  { value: 'easy', label: '简单', desc: '入门级题目，适合热身' },
-  { value: 'medium', label: '中等', desc: '常见面试题，重点掌握' },
-  { value: 'hard', label: '困难', desc: '深度题目，挑战极限' },
-];
-
-const countOptions = [5, 10, 15, 20, 30];
-
-const durationOptions = [
-  { value: 10, label: '10分钟' },
-  { value: 20, label: '20分钟' },
-  { value: 30, label: '30分钟' },
-  { value: 45, label: '45分钟' },
-  { value: 60, label: '60分钟' },
-];
+import { difficultyOptions, countOptions, durationOptions, examDefaultConfig } from '@/config';
 
 export default function ExamConfigPage() {
   const navigate = useNavigate();
@@ -30,10 +14,10 @@ export default function ExamConfigPage() {
   const startExam = useExamStore((state) => state.startExam);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['java']);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | 'all'>('all');
-  const [questionCount, setQuestionCount] = useState<number>(10);
-  const [duration, setDuration] = useState<number>(30);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(examDefaultConfig.defaultCategoryIds);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | 'all'>(examDefaultConfig.defaultDifficulty);
+  const [questionCount, setQuestionCount] = useState<number>(examDefaultConfig.defaultQuestionCount);
+  const [duration, setDuration] = useState<number>(examDefaultConfig.defaultDuration);
 
   useEffect(() => {
     const timer = setTimeout(() => {

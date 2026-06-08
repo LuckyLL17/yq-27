@@ -2,9 +2,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import {
   ArrowLeft,
-  Coffee,
-  Database,
-  Zap,
   Clock,
   BookOpen,
   Calendar,
@@ -13,39 +10,13 @@ import {
   ChevronRight,
   Trophy,
   Target,
-  BookMarked,
-  FileQuestion,
-  ClipboardList,
-  Code2,
-  Terminal,
-  Braces,
 } from 'lucide-react';
 import { learningPaths } from '@/data/learningPaths';
 import { useLearningPathStore } from '@/store/useLearningPathStore';
 import { LearningPhase, LearningStep } from '@/types';
 import { cn } from '@/lib/utils';
 import { LearningPathDetailSkeleton } from '@/components/LearningPathDetailSkeleton';
-
-const iconMap: Record<string, React.ReactNode> = {
-  coffee: <Coffee className="w-6 h-6" />,
-  'code-2': <Code2 className="w-6 h-6" />,
-  terminal: <Terminal className="w-6 h-6" />,
-  braces: <Braces className="w-6 h-6" />,
-  database: <Database className="w-6 h-6" />,
-  zap: <Zap className="w-6 h-6" />,
-};
-
-const stepTypeIcon: Record<string, React.ReactNode> = {
-  question: <FileQuestion className="w-4 h-4" />,
-  exam: <ClipboardList className="w-4 h-4" />,
-  category: <BookMarked className="w-4 h-4" />,
-};
-
-const stepTypeLabel: Record<string, string> = {
-  question: '题目学习',
-  exam: '阶段测评',
-  category: '专题学习',
-};
+import { iconMap, stepTypeConfig, type StepType } from '@/config';
 
 function formatDuration(minutes: number): string {
   if (minutes < 60) return `${minutes}分钟`;
@@ -140,12 +111,13 @@ function PhaseSection({ pathId, phase, phaseIndex, currentStepId, completedStepI
                 <div className="flex items-center gap-2 mb-1">
                   <span className={cn(
                     "inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-md",
-                    step.type === 'question' && "bg-blue-500/10 text-blue-400",
-                    step.type === 'exam' && "bg-purple-500/10 text-purple-400",
-                    step.type === 'category' && "bg-cyan-500/10 text-cyan-400"
+                    stepTypeConfig[step.type as StepType].colorClass
                   )}>
-                    {stepTypeIcon[step.type]}
-                    {stepTypeLabel[step.type]}
+                    {(() => {
+                      const Icon = stepTypeConfig[step.type as StepType].icon;
+                      return <Icon className="w-4 h-4" />;
+                    })()}
+                    {stepTypeConfig[step.type as StepType].label}
                   </span>
                 </div>
                 <h4 className={cn(
@@ -278,7 +250,10 @@ export default function LearningPathDetail() {
             </button>
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${path.gradient} flex items-center justify-center text-white`}>
-                {iconMap[path.icon] || <BookOpen className="w-5 h-5" />}
+                {(() => {
+                  const Icon = iconMap[path.icon] || BookOpen;
+                  return <Icon className="w-5 h-5" />;
+                })()}
               </div>
               <div>
                 <h1 className="text-lg font-bold text-white">{path.title}</h1>
@@ -324,8 +299,11 @@ export default function LearningPathDetail() {
                       预计 {formatDuration(currentStep.durationMinutes)}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      {stepTypeIcon[currentStep.type]}
-                      {stepTypeLabel[currentStep.type]}
+                      {(() => {
+                        const Icon = stepTypeConfig[currentStep.type as StepType].icon;
+                        return <Icon className="w-4 h-4" />;
+                      })()}
+                      {stepTypeConfig[currentStep.type as StepType].label}
                     </span>
                   </div>
                 </div>
@@ -353,7 +331,10 @@ export default function LearningPathDetail() {
         {!hasStarted && (
           <div className="mb-8 bg-dark-800/50 border border-dark-700 rounded-2xl p-8 text-center">
             <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${path.gradient} flex items-center justify-center text-white mx-auto mb-5 shadow-lg`}>
-              {iconMap[path.icon] || <BookOpen className="w-10 h-10" />}
+              {(() => {
+                const Icon = iconMap[path.icon] || BookOpen;
+                return <Icon className="w-10 h-10" />;
+              })()}
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">准备好开始学习了吗？</h2>
             <p className="text-dark-400 mb-6 max-w-lg mx-auto">

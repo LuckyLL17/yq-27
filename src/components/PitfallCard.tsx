@@ -1,29 +1,5 @@
-import { AlertTriangle, AlertCircle, Info } from 'lucide-react';
 import { Pitfall } from '../types';
-
-const severityConfig = {
-  high: {
-    icon: AlertTriangle,
-    bgClass: 'bg-red-500/10',
-    borderClass: 'border-red-500/30',
-    textClass: 'text-red-400',
-    label: '高危',
-  },
-  medium: {
-    icon: AlertCircle,
-    bgClass: 'bg-orange-500/10',
-    borderClass: 'border-orange-500/30',
-    textClass: 'text-orange-400',
-    label: '中危',
-  },
-  low: {
-    icon: Info,
-    bgClass: 'bg-blue-500/10',
-    borderClass: 'border-blue-500/30',
-    textClass: 'text-blue-400',
-    label: '注意',
-  },
-};
+import { severityConfig } from '@/config';
 
 interface PitfallCardProps {
   pitfall: Pitfall;

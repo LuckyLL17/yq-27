@@ -17,6 +17,7 @@ import {
 import { useExamStore } from '@/store/useExamStore';
 import { ExamHistoryRecord } from '@/types';
 import { ExamHistorySkeleton } from '@/components/ExamHistorySkeleton';
+import { allDifficultyConfig, getScoreLevel } from '@/config';
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -34,21 +35,8 @@ function formatDate(timestamp: number): string {
   return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
-function getScoreLevel(score: number) {
-  if (score >= 90) return { label: '优秀', color: 'text-green-400', bg: 'from-green-500/20 to-emerald-500/20', border: 'border-green-500/30' };
-  if (score >= 70) return { label: '良好', color: 'text-blue-400', bg: 'from-blue-500/20 to-cyan-500/20', border: 'border-blue-500/30' };
-  if (score >= 60) return { label: '及格', color: 'text-yellow-400', bg: 'from-yellow-500/20 to-orange-500/20', border: 'border-yellow-500/30' };
-  return { label: '需加油', color: 'text-red-400', bg: 'from-red-500/20 to-pink-500/20', border: 'border-red-500/30' };
-}
-
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
-  const config: Record<string, { label: string; className: string }> = {
-    all: { label: '全部', className: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-    easy: { label: '简单', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
-    medium: { label: '中等', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
-    hard: { label: '困难', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
-  };
-  const cfg = config[difficulty] || config.all;
+  const cfg = allDifficultyConfig[difficulty] || allDifficultyConfig.all;
   return (
     <span className={`px-2 py-0.5 text-xs font-medium rounded-full border ${cfg.className}`}>
       {cfg.label}

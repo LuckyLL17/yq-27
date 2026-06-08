@@ -24,6 +24,7 @@ import PitfallCard from '@/components/PitfallCard';
 import Markdown from '@/components/Markdown';
 import { ExamResultSkeleton } from '@/components/ExamResultSkeleton';
 import { ScoreDetail } from '@/types';
+import { difficultyConfig, scoreLevelConfig, getScoreLevel, passScore } from '@/config';
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -57,13 +58,7 @@ function ScoreBar({ label, score, color }: { label: string; score: number; color
 }
 
 function ScoreDetailCard({ detail }: { detail: ScoreDetail }) {
-  const levelConfig = {
-    excellent: { label: '优秀', color: 'text-green-400', bg: 'bg-green-500' },
-    good: { label: '良好', color: 'text-blue-400', bg: 'bg-blue-500' },
-    pass: { label: '及格', color: 'text-yellow-400', bg: 'bg-yellow-500' },
-    fail: { label: '不及格', color: 'text-red-400', bg: 'bg-red-500' },
-  };
-  const level = levelConfig[detail.level];
+  const level = scoreLevelConfig[detail.level];
 
   return (
     <div className="bg-dark-900/50 rounded-xl p-4 border border-dark-700">
@@ -169,18 +164,11 @@ export default function ExamResultPage() {
     navigate('/exam/history');
   };
 
-  const getScoreLevel = (score: number) => {
-    if (score >= 90) return { label: '优秀', color: 'text-green-400', bg: 'from-green-500/20 to-emerald-500/20' };
-    if (score >= 70) return { label: '良好', color: 'text-blue-400', bg: 'from-blue-500/20 to-cyan-500/20' };
-    if (score >= 60) return { label: '及格', color: 'text-yellow-400', bg: 'from-yellow-500/20 to-orange-500/20' };
-    return { label: '需加油', color: 'text-red-400', bg: 'from-red-500/20 to-pink-500/20' };
-  };
-
   const scoreLevel = getScoreLevel(result.score);
 
   const getAnswerStatus = (eq: (typeof result.answers)[0]) => {
     if (!eq.isAnswered) return 'unanswered';
-    if (eq.scoreDetail && eq.scoreDetail.totalScore >= 60) return 'correct';
+    if (eq.scoreDetail && eq.scoreDetail.totalScore >= passScore) return 'correct';
     return 'wrong';
   };
 
@@ -203,12 +191,6 @@ export default function ExamResultPage() {
       else if (filterType === 'unanswered' && status === 'unanswered') count++;
     }
     return count + 1;
-  };
-
-  const difficultyConfig = {
-    easy: { label: '简单', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
-    medium: { label: '中等', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
-    hard: { label: '困难', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
   };
 
   return (
@@ -379,7 +361,7 @@ export default function ExamResultPage() {
                         {eq.scoreDetail && (
                           <span
                             className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                              eq.scoreDetail.totalScore >= 60
+                              eq.scoreDetail.totalScore >= passScore
                                 ? 'bg-green-500/10 text-green-400'
                                 : 'bg-red-500/10 text-red-400'
                             }`}

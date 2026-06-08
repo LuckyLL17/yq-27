@@ -2,22 +2,7 @@ import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Flame, ChevronRight } from 'lucide-react';
 import { Question } from '../types';
-import { cn } from '@/lib/utils';
-
-const difficultyConfig = {
-  easy: {
-    label: '简单',
-    className: 'bg-green-500/10 text-green-400 border-green-500/20',
-  },
-  medium: {
-    label: '中等',
-    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-  },
-  hard: {
-    label: '困难',
-    className: 'bg-red-500/10 text-red-400 border-red-500/20',
-  },
-};
+import { difficultyConfig } from '@/config';
 
 interface QuestionCardProps {
   question: Omit<Question, 'title'> & { title: ReactNode };

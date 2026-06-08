@@ -10,6 +10,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { useExamStore } from '@/store/useExamStore';
+import { difficultyConfig, timeWarningThreshold } from '@/config';
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -66,7 +67,7 @@ export default function ExamTakePage() {
   const markedCount = examQuestions.filter((q) => q.isMarked).length;
   const unansweredCount = examQuestions.length - answeredCount;
 
-  const isTimeWarning = remainingTime < 300;
+  const isTimeWarning = remainingTime < timeWarningThreshold;
 
   const handlePrev = () => {
     if (currentIndex > 0) {
@@ -83,12 +84,6 @@ export default function ExamTakePage() {
   const handleSubmit = () => {
     submitExam();
     navigate('/exam/result');
-  };
-
-  const difficultyConfig = {
-    easy: { label: '简单', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
-    medium: { label: '中等', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
-    hard: { label: '困难', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
   };
 
   const difficulty = difficultyConfig[currentQuestion.question.difficulty];

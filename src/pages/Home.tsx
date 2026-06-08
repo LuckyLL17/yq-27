@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Sparkles, Target, BookOpen, TrendingUp, ChevronRight, ClipboardList, Clock, Route, Coffee, Database, Zap, Code2, Terminal, Braces } from 'lucide-react';
+import { Search, Sparkles, Target, BookOpen, TrendingUp, ChevronRight, ClipboardList, Clock, Route } from 'lucide-react';
 import CategoryCard from '@/components/CategoryCard';
 import QuestionCard from '@/components/QuestionCard';
 import { QuestionListSkeleton } from '@/components/QuestionCardSkeleton';
@@ -11,15 +11,7 @@ import { questions } from '@/data/questions';
 import { learningPaths } from '@/data/learningPaths';
 import { useLearningPathStore } from '@/store/useLearningPathStore';
 import { Skeleton } from '@/components/Skeleton';
-
-const iconMap: Record<string, React.ReactNode> = {
-  coffee: <Coffee className="w-6 h-6" />,
-  'code-2': <Code2 className="w-6 h-6" />,
-  terminal: <Terminal className="w-6 h-6" />,
-  braces: <Braces className="w-6 h-6" />,
-  database: <Database className="w-6 h-6" />,
-  zap: <Zap className="w-6 h-6" />,
-};
+import { iconMap } from '@/config';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -234,7 +226,10 @@ export default function Home() {
                   <div className="p-6">
                     <div className="flex items-start gap-4 mb-4">
                       <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${path.gradient} flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform`}>
-                        {iconMap[path.icon] || <BookOpen className="w-6 h-6" />}
+                        {(() => {
+                          const Icon = iconMap[path.icon] || BookOpen;
+                          return <Icon className="w-6 h-6" />;
+                        })()}
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold text-white group-hover:text-primary-400 transition-colors truncate">
