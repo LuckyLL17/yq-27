@@ -11,6 +11,9 @@ import {
   RotateCcw,
   Trophy,
   TrendingUp,
+  Code2,
+  Terminal,
+  Braces,
 } from 'lucide-react';
 import { learningPaths } from '@/data/learningPaths';
 import { useLearningPathStore } from '@/store/useLearningPathStore';
@@ -18,6 +21,9 @@ import { LearningPath } from '@/types';
 
 const iconMap: Record<string, React.ReactNode> = {
   coffee: <Coffee className="w-7 h-7" />,
+  'code-2': <Code2 className="w-7 h-7" />,
+  terminal: <Terminal className="w-7 h-7" />,
+  braces: <Braces className="w-7 h-7" />,
   database: <Database className="w-7 h-7" />,
   zap: <Zap className="w-7 h-7" />,
 };

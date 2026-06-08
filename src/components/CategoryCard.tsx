@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Coffee, Database, Zap, MessageSquare, LayoutGrid } from 'lucide-react';
+import { Coffee, Database, Zap, MessageSquare, LayoutGrid, Code2, Terminal, Braces } from 'lucide-react';
 import { Category } from '../types';
 
 const iconMap: Record<string, React.ReactNode> = {
   coffee: <Coffee className="w-6 h-6" />,
+  'code-2': <Code2 className="w-6 h-6" />,
+  terminal: <Terminal className="w-6 h-6" />,
+  braces: <Braces className="w-6 h-6" />,
   database: <Database className="w-6 h-6" />,
   zap: <Zap className="w-6 h-6" />,
   'message-square': <MessageSquare className="w-6 h-6" />,

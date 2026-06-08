@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Sparkles, Target, BookOpen, TrendingUp, ChevronRight, ClipboardList, Clock, Route, Coffee, Database, Zap } from 'lucide-react';
+import { Search, Sparkles, Target, BookOpen, TrendingUp, ChevronRight, ClipboardList, Clock, Route, Coffee, Database, Zap, Code2, Terminal, Braces } from 'lucide-react';
 import CategoryCard from '@/components/CategoryCard';
 import QuestionCard from '@/components/QuestionCard';
 import { categories } from '@/data/categories';
@@ -10,6 +10,9 @@ import { useLearningPathStore } from '@/store/useLearningPathStore';
 
 const iconMap: Record<string, React.ReactNode> = {
   coffee: <Coffee className="w-6 h-6" />,
+  'code-2': <Code2 className="w-6 h-6" />,
+  terminal: <Terminal className="w-6 h-6" />,
+  braces: <Braces className="w-6 h-6" />,
   database: <Database className="w-6 h-6" />,
   zap: <Zap className="w-6 h-6" />,
 };
