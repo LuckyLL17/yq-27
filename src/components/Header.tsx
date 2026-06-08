@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Search, Menu, X, ClipboardList, History } from 'lucide-react';
+import { BookOpen, Search, Menu, X, ClipboardList, History, Route } from 'lucide-react';
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,6 +34,12 @@ export default function Header() {
               className="px-4 py-2 text-dark-300 hover:text-white hover:bg-dark-800 rounded-lg transition-colors"
             >
               首页
+            </Link>
+            <Link
+              to="/learning-paths"
+              className="px-4 py-2 text-dark-300 hover:text-white hover:bg-dark-800 rounded-lg transition-colors"
+            >
+              学习路线
             </Link>
             <Link
               to="/category/java"
@@ -123,6 +129,14 @@ export default function Header() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 首页
+              </Link>
+              <Link
+                to="/learning-paths"
+                className="px-4 py-2 text-dark-300 hover:text-white hover:bg-dark-800 rounded-lg transition-colors flex items-center gap-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Route className="w-4 h-4" />
+                学习路线
               </Link>
               <Link
                 to="/category/java"

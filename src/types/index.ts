@@ -87,3 +87,42 @@ export interface ExamHistoryRecord {
   unansweredCount: number;
   timeSpent: number;
 }
+
+export interface LearningStep {
+  id: string;
+  title: string;
+  description: string;
+  type: 'question' | 'exam' | 'category';
+  targetId: string;
+  durationMinutes: number;
+}
+
+export interface LearningPhase {
+  id: string;
+  title: string;
+  description: string;
+  steps: LearningStep[];
+}
+
+export interface LearningPath {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: string;
+  color: string;
+  gradient: string;
+  level: 'beginner' | 'intermediate' | 'advanced' | 'all';
+  estimatedDays: number;
+  totalQuestions: number;
+  phases: LearningPhase[];
+}
+
+export interface LearningProgress {
+  currentStepId: string | null;
+  currentPhaseId: string | null;
+  completedStepIds: string[];
+  completedPhaseIds: string[];
+  startedAt: number | null;
+  lastStudiedAt: number | null;
+}
