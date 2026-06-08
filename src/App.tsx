@@ -7,6 +7,7 @@ import SearchPage from "@/pages/Search";
 import ExamConfigPage from "@/pages/ExamConfig";
 import ExamTakePage from "@/pages/ExamTake";
 import ExamResultPage from "@/pages/ExamResult";
+import ExamHistoryPage from "@/pages/ExamHistory";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/exam/config" element={<ExamConfigPage />} />
             <Route path="/exam/take" element={<ExamTakePage />} />
             <Route path="/exam/result" element={<ExamResultPage />} />
+            <Route path="/exam/history" element={<ExamHistoryPage />} />
           </Routes>
         </main>
         <footer className="border-t border-dark-700 py-8 mt-auto">

@@ -38,10 +38,21 @@ export interface Question {
 }
 
 export interface ExamConfig {
-  categoryId: string;
+  categoryIds: string[];
   difficulty: Difficulty | 'all';
   questionCount: number;
   duration: number;
+}
+
+export interface ScoreDetail {
+  totalScore: number;
+  keywordScore: number;
+  structureScore: number;
+  depthScore: number;
+  completenessScore: number;
+  matchedKeywords: string[];
+  missedKeywords: string[];
+  level: 'excellent' | 'good' | 'pass' | 'fail';
 }
 
 export interface ExamQuestion {
@@ -49,6 +60,7 @@ export interface ExamQuestion {
   userAnswer: string;
   isAnswered: boolean;
   isMarked: boolean;
+  scoreDetail?: ScoreDetail;
 }
 
 export interface ExamResult {
@@ -59,4 +71,19 @@ export interface ExamResult {
   score: number;
   timeSpent: number;
   answers: ExamQuestion[];
+}
+
+export interface ExamHistoryRecord {
+  id: string;
+  timestamp: number;
+  categoryIds: string[];
+  categoryNames: string[];
+  difficulty: Difficulty | 'all';
+  questionCount: number;
+  duration: number;
+  score: number;
+  correctCount: number;
+  wrongCount: number;
+  unansweredCount: number;
+  timeSpent: number;
 }

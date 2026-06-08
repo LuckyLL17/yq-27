@@ -1,4 +1,4 @@
-import { useState, Children } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Trophy,
@@ -15,10 +15,14 @@ import {
   AlertTriangle,
   Code,
   Flame,
+  BarChart3,
+  History,
 } from 'lucide-react';
 import { useExamStore } from '@/store/useExamStore';
 import CodeBlock from '@/components/CodeBlock';
 import PitfallCard from '@/components/PitfallCard';
+import Markdown from '@/components/Markdown';
+import { ScoreDetail } from '@/types';
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -26,19 +30,100 @@ function formatTime(seconds: number): string {
   return `${mins}分${secs}秒`;
 }
 
-function evaluateAnswer(userAnswer: string, standardSolution: string): boolean {
-  if (!userAnswer.trim()) return false;
-  const userLower = userAnswer.toLowerCase().trim();
-  const solutionLower = standardSolution.toLowerCase();
-  const keywords = solutionLower.match(/[\u4e00-\u9fa5a-zA-Z]+/g) || [];
-  const uniqueKeywords = [...new Set(keywords.filter(k => k.length >= 2))];
-  const matchCount = uniqueKeywords.filter(keyword => userLower.includes(keyword)).length;
-  return uniqueKeywords.length > 0 && matchCount / uniqueKeywords.length >= 0.3;
+function ScoreBar({ label, score, color }: { label: string; score: number; color: string }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-dark-400">{label}</span>
+        <span className={`font-medium ${color}`}>{score}分</span>
+      </div>
+      <div className="h-1.5 bg-dark-700 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${
+            color === 'text-green-400'
+              ? 'bg-green-500'
+              : color === 'text-blue-400'
+              ? 'bg-blue-500'
+              : color === 'text-yellow-400'
+              ? 'bg-yellow-500'
+              : 'bg-cyan-500'
+          }`}
+          style={{ width: `${Math.max(score, 0)}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ScoreDetailCard({ detail }: { detail: ScoreDetail }) {
+  const levelConfig = {
+    excellent: { label: '优秀', color: 'text-green-400', bg: 'bg-green-500' },
+    good: { label: '良好', color: 'text-blue-400', bg: 'bg-blue-500' },
+    pass: { label: '及格', color: 'text-yellow-400', bg: 'bg-yellow-500' },
+    fail: { label: '不及格', color: 'text-red-400', bg: 'bg-red-500' },
+  };
+  const level = levelConfig[detail.level];
+
+  return (
+    <div className="bg-dark-900/50 rounded-xl p-4 border border-dark-700">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
+            <BarChart3 className="w-4 h-4 text-primary-400" />
+          </div>
+          <span className="font-medium text-white">评分详情</span>
+        </div>
+        <div className={`text-2xl font-bold ${level.color}`}>
+          {detail.totalScore}
+          <span className="text-sm font-normal text-dark-500"> / 100</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <ScoreBar label="关键词覆盖" score={detail.keywordScore} color="text-cyan-400" />
+        <ScoreBar label="结构清晰度" score={detail.structureScore} color="text-blue-400" />
+        <ScoreBar label="内容深度" score={detail.depthScore} color="text-green-400" />
+        <ScoreBar label="答题完整度" score={detail.completenessScore} color="text-yellow-400" />
+      </div>
+
+      {detail.matchedKeywords.length > 0 && (
+        <div className="mb-3">
+          <div className="text-xs text-dark-400 mb-2">✓ 命中的关键词</div>
+          <div className="flex flex-wrap gap-1.5">
+            {detail.matchedKeywords.map((kw, i) => (
+              <span
+                key={i}
+                className="px-2 py-0.5 text-xs bg-green-500/10 text-green-400 rounded-full"
+              >
+                {kw}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {detail.missedKeywords.length > 0 && (
+        <div>
+          <div className="text-xs text-dark-400 mb-2">✗ 遗漏的关键词</div>
+          <div className="flex flex-wrap gap-1.5">
+            {detail.missedKeywords.map((kw, i) => (
+              <span
+                key={i}
+                className="px-2 py-0.5 text-xs bg-red-500/10 text-red-400 rounded-full"
+              >
+                {kw}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function ExamResultPage() {
   const navigate = useNavigate();
-  const { result, resetExam, config } = useExamStore();
+  const { result, resetExam, config, history } = useExamStore();
   const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
   const [filterType, setFilterType] = useState<'all' | 'correct' | 'wrong' | 'unanswered'>('all');
 
@@ -67,6 +152,10 @@ export default function ExamResultPage() {
     navigate('/');
   };
 
+  const handleViewHistory = () => {
+    navigate('/exam/history');
+  };
+
   const getScoreLevel = (score: number) => {
     if (score >= 90) return { label: '优秀', color: 'text-green-400', bg: 'from-green-500/20 to-emerald-500/20' };
     if (score >= 70) return { label: '良好', color: 'text-blue-400', bg: 'from-blue-500/20 to-cyan-500/20' };
@@ -76,81 +165,17 @@ export default function ExamResultPage() {
 
   const scoreLevel = getScoreLevel(result.score);
 
-  const renderMarkdown = (text: string) => {
-    const lines = text.split('\n');
-    const elements: React.ReactNode[] = [];
-    let inList = false;
-
-    lines.forEach((line, index) => {
-      if (line.startsWith('**') && line.endsWith('**')) {
-        elements.push(
-          <h4 key={index} className="text-base font-semibold text-white mt-3 mb-2">
-            {line.replace(/\*\*/g, '')}
-          </h4>
-        );
-      } else if (line.startsWith('- ')) {
-        if (!inList) {
-          inList = true;
-          elements.push(
-            <ul key={`ul-${index}`} className="list-disc list-inside space-y-1 text-dark-300 text-sm">
-              <li>{line.slice(2)}</li>
-            </ul>
-          );
-        } else {
-          const lastUl = elements[elements.length - 1] as React.ReactElement;
-          if (lastUl && lastUl.type === 'ul') {
-            const childrenArray = Children.toArray(lastUl.props.children);
-            elements[elements.length - 1] = (
-              <ul key={`ul-${index}`} className="list-disc list-inside space-y-1 text-dark-300 text-sm">
-                {childrenArray}
-                <li>{line.slice(2)}</li>
-              </ul>
-            );
-          }
-        }
-      } else if (line.startsWith('  - ')) {
-        elements.push(
-          <div key={index} className="ml-6 list-disc list-inside text-dark-400 text-sm">
-            {line.slice(4)}
-          </div>
-        );
-      } else if (line.startsWith('**')) {
-        const parts = line.split('**');
-        elements.push(
-          <p key={index} className="text-dark-300 leading-relaxed text-sm">
-            <strong className="text-white font-medium">{parts[1]}</strong>
-            {parts.slice(2).join('**')}
-          </p>
-        );
-      } else if (line.trim() === '') {
-        elements.push(<div key={index} className="h-2" />);
-        inList = false;
-      } else if (/^\d+\./.test(line)) {
-        elements.push(
-          <div key={index} className="flex gap-2 text-dark-300 text-sm">
-            <span className="text-primary-400 font-medium flex-shrink-0">
-              {line.match(/^\d+/)?.[0]}.
-            </span>
-            <span>{line.replace(/^\d+\.\s*/, '')}</span>
-          </div>
-        );
-      } else {
-        elements.push(
-          <p key={index} className="text-dark-300 leading-relaxed text-sm">
-            {line}
-          </p>
-        );
-      }
-    });
-
-    return elements;
+  const getAnswerStatus = (eq: (typeof result.answers)[0]) => {
+    if (!eq.isAnswered) return 'unanswered';
+    if (eq.scoreDetail && eq.scoreDetail.totalScore >= 60) return 'correct';
+    return 'wrong';
   };
 
   const filteredAnswers = result.answers.filter((eq) => {
-    const isCorrect = evaluateAnswer(eq.userAnswer, eq.question.standardSolution);
-    if (filterType === 'correct') return eq.isAnswered && isCorrect;
-    if (filterType === 'wrong') return eq.isAnswered && !isCorrect;
-    if (filterType === 'unanswered') return !eq.isAnswered;
+    const status = getAnswerStatus(eq);
+    if (filterType === 'correct') return status === 'correct';
+    if (filterType === 'wrong') return status === 'wrong';
+    if (filterType === 'unanswered') return status === 'unanswered';
     return true;
   });
 
@@ -158,11 +183,11 @@ export default function ExamResultPage() {
     let count = 0;
     for (let i = 0; i < originalIndex; i++) {
       const eq = result.answers[i];
-      const isCorrect = evaluateAnswer(eq.userAnswer, eq.question.standardSolution);
+      const status = getAnswerStatus(eq);
       if (filterType === 'all') count++;
-      else if (filterType === 'correct' && eq.isAnswered && isCorrect) count++;
-      else if (filterType === 'wrong' && eq.isAnswered && !isCorrect) count++;
-      else if (filterType === 'unanswered' && !eq.isAnswered) count++;
+      else if (filterType === 'correct' && status === 'correct') count++;
+      else if (filterType === 'wrong' && status === 'wrong') count++;
+      else if (filterType === 'unanswered' && status === 'unanswered') count++;
     }
     return count + 1;
   };
@@ -183,8 +208,10 @@ export default function ExamResultPage() {
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">考试结束</h1>
             <p className="text-dark-400 mb-6">
-              {config?.categoryId && `分类: ${config.categoryId}`} · 
-              共 {result.totalQuestions} 题
+              {config?.categoryIds.length === 1
+                ? `分类: ${config.categoryIds[0]}`
+                : `分类: ${config?.categoryIds.length}个方向`}{' '}
+              · 共 {result.totalQuestions} 题
             </p>
 
             <div className="text-6xl font-bold mb-2">
@@ -226,7 +253,13 @@ export default function ExamResultPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4" />
-                <span>正确率 {result.totalQuestions > 0 ? Math.round((result.correctCount / result.totalQuestions) * 100) : 0}%</span>
+                <span>
+                  正确率{' '}
+                  {result.totalQuestions > 0
+                    ? Math.round((result.correctCount / result.totalQuestions) * 100)
+                    : 0}
+                  %
+                </span>
               </div>
             </div>
           </div>
@@ -245,6 +278,13 @@ export default function ExamResultPage() {
             >
               <Home className="w-4 h-4" />
               返回首页
+            </button>
+            <button
+              onClick={handleViewHistory}
+              className="flex items-center gap-2 px-5 py-2.5 bg-dark-800 hover:bg-dark-700 text-white font-medium rounded-xl transition-colors"
+            >
+              <History className="w-4 h-4" />
+              历史成绩 ({history.length})
             </button>
 
             <div className="flex-1" />
@@ -273,12 +313,12 @@ export default function ExamResultPage() {
 
           <div className="space-y-4">
             {result.answers.map((eq, originalIndex) => {
-              const isCorrect = evaluateAnswer(eq.userAnswer, eq.question.standardSolution);
-              const shouldShow = 
+              const status = getAnswerStatus(eq);
+              const shouldShow =
                 filterType === 'all' ||
-                (filterType === 'correct' && eq.isAnswered && isCorrect) ||
-                (filterType === 'wrong' && eq.isAnswered && !isCorrect) ||
-                (filterType === 'unanswered' && !eq.isAnswered);
+                (filterType === 'correct' && status === 'correct') ||
+                (filterType === 'wrong' && status === 'wrong') ||
+                (filterType === 'unanswered' && status === 'unanswered');
 
               if (!shouldShow) return null;
 
@@ -295,13 +335,18 @@ export default function ExamResultPage() {
                     onClick={() => toggleQuestion(originalIndex)}
                     className="w-full flex items-start gap-4 p-5 hover:bg-dark-800/80 transition-colors text-left"
                   >
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                      !eq.isAnswered ? 'bg-yellow-500/10' :
-                      isCorrect ? 'bg-green-500/10' : 'bg-red-500/10'
-                    }`}>
-                      {!eq.isAnswered ? (
+                    <div
+                      className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
+                        status === 'unanswered'
+                          ? 'bg-yellow-500/10'
+                          : status === 'correct'
+                          ? 'bg-green-500/10'
+                          : 'bg-red-500/10'
+                      }`}
+                    >
+                      {status === 'unanswered' ? (
                         <HelpCircle className="w-5 h-5 text-yellow-400" />
-                      ) : isCorrect ? (
+                      ) : status === 'correct' ? (
                         <CheckCircle className="w-5 h-5 text-green-400" />
                       ) : (
                         <XCircle className="w-5 h-5 text-red-400" />
@@ -318,6 +363,17 @@ export default function ExamResultPage() {
                         >
                           {difficulty.label}
                         </span>
+                        {eq.scoreDetail && (
+                          <span
+                            className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                              eq.scoreDetail.totalScore >= 60
+                                ? 'bg-green-500/10 text-green-400'
+                                : 'bg-red-500/10 text-red-400'
+                            }`}
+                          >
+                            {eq.scoreDetail.totalScore}分
+                          </span>
+                        )}
                         {eq.question.isHot && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-orange-500/10 text-orange-400 rounded-full">
                             <Flame className="w-3 h-3" />
@@ -340,7 +396,7 @@ export default function ExamResultPage() {
                   </button>
 
                   {isExpanded && (
-                    <div className="border-t border-dark-700 p-5 space-y-6 animate-fade-in">
+                    <div className="border-t border-dark-700 p-5 space-y-5 animate-fade-in">
                       <div>
                         <h4 className="text-sm font-semibold text-dark-400 uppercase tracking-wide mb-2">
                           题目描述
@@ -350,23 +406,36 @@ export default function ExamResultPage() {
                         </p>
                       </div>
 
+                      {eq.scoreDetail && <ScoreDetailCard detail={eq.scoreDetail} />}
+
                       <div>
                         <h4 className="text-sm font-semibold text-dark-400 uppercase tracking-wide mb-2">
                           你的答案
-                          {!eq.isAnswered && (
-                            <span className="ml-2 text-yellow-400 text-xs font-normal">（未作答）</span>
+                          {status === 'unanswered' && (
+                            <span className="ml-2 text-yellow-400 text-xs font-normal">
+                              （未作答）
+                            </span>
                           )}
-                          {eq.isAnswered && !isCorrect && (
-                            <span className="ml-2 text-red-400 text-xs font-normal">（答案不准确）</span>
+                          {status === 'wrong' && (
+                            <span className="ml-2 text-red-400 text-xs font-normal">
+                              （答案需要加强）
+                            </span>
                           )}
-                          {eq.isAnswered && isCorrect && (
-                            <span className="ml-2 text-green-400 text-xs font-normal">（回答正确）</span>
+                          {status === 'correct' && (
+                            <span className="ml-2 text-green-400 text-xs font-normal">
+                              （回答不错）
+                            </span>
                           )}
                         </h4>
-                        <div className={`p-4 rounded-xl ${
-                          !eq.isAnswered ? 'bg-yellow-500/5 border border-yellow-500/20' :
-                          isCorrect ? 'bg-green-500/5 border border-green-500/20' : 'bg-red-500/5 border border-red-500/20'
-                        }`}>
+                        <div
+                          className={`p-4 rounded-xl ${
+                            status === 'unanswered'
+                              ? 'bg-yellow-500/5 border border-yellow-500/20'
+                              : status === 'correct'
+                              ? 'bg-green-500/5 border border-green-500/20'
+                              : 'bg-red-500/5 border border-red-500/20'
+                          }`}
+                        >
                           {eq.userAnswer ? (
                             <p className="text-dark-300 whitespace-pre-wrap text-sm leading-relaxed">
                               {eq.userAnswer}
@@ -382,12 +451,10 @@ export default function ExamResultPage() {
                           <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
                             <BookOpen className="w-4 h-4 text-green-400" />
                           </div>
-                          <h4 className="text-sm font-semibold text-white">
-                            标准解析
-                          </h4>
+                          <h4 className="text-sm font-semibold text-white">标准解析</h4>
                         </div>
                         <div className="bg-dark-900/50 rounded-xl p-4 border border-dark-700">
-                          {renderMarkdown(eq.question.standardSolution)}
+                          <Markdown text={eq.question.standardSolution} size="sm" />
                         </div>
                       </div>
 
@@ -397,17 +464,11 @@ export default function ExamResultPage() {
                             <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
                               <Code className="w-4 h-4 text-cyan-400" />
                             </div>
-                            <h4 className="text-sm font-semibold text-white">
-                              代码示例
-                            </h4>
+                            <h4 className="text-sm font-semibold text-white">代码示例</h4>
                           </div>
                           <div className="space-y-3">
                             {eq.question.codeExamples.map((example, idx) => (
-                              <CodeBlock
-                                key={idx}
-                                code={example.code}
-                                language={example.language}
-                              />
+                              <CodeBlock key={idx} code={example.code} language={example.language} />
                             ))}
                           </div>
                         </div>

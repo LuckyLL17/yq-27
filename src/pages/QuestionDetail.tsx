@@ -1,4 +1,4 @@
-import { useState, Children } from 'react';
+import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -13,6 +13,7 @@ import {
 import CodeBlock from '@/components/CodeBlock';
 import PitfallCard from '@/components/PitfallCard';
 import QuestionCard from '@/components/QuestionCard';
+import Markdown from '@/components/Markdown';
 import { questions } from '@/data/questions';
 import { categories } from '@/data/categories';
 
@@ -55,76 +56,6 @@ export default function QuestionDetail() {
   }
 
   const difficulty = difficultyConfig[question.difficulty];
-
-  const renderMarkdown = (text: string) => {
-    const lines = text.split('\n');
-    const elements: React.ReactNode[] = [];
-    let inList = false;
-
-    lines.forEach((line, index) => {
-      if (line.startsWith('**') && line.endsWith('**')) {
-        elements.push(
-          <h3 key={index} className="text-lg font-semibold text-white mt-4 mb-2">
-            {line.replace(/\*\*/g, '')}
-          </h3>
-        );
-      } else if (line.startsWith('- ')) {
-        if (!inList) {
-          inList = true;
-          elements.push(
-            <ul key={`ul-${index}`} className="list-disc list-inside space-y-1 text-dark-300">
-              <li>{line.slice(2)}</li>
-            </ul>
-          );
-        } else {
-          const lastUl = elements[elements.length - 1] as React.ReactElement;
-          if (lastUl && lastUl.type === 'ul') {
-            const childrenArray = Children.toArray(lastUl.props.children);
-            elements[elements.length - 1] = (
-              <ul key={`ul-${index}`} className="list-disc list-inside space-y-1 text-dark-300">
-                {childrenArray}
-                <li>{line.slice(2)}</li>
-              </ul>
-            );
-          }
-        }
-      } else if (line.startsWith('  - ')) {
-        elements.push(
-          <div key={index} className="ml-6 list-disc list-inside text-dark-400">
-            {line.slice(4)}
-          </div>
-        );
-      } else if (line.startsWith('**')) {
-        const parts = line.split('**');
-        elements.push(
-          <p key={index} className="text-dark-300 leading-relaxed">
-            <strong className="text-white font-medium">{parts[1]}</strong>
-            {parts.slice(2).join('**')}
-          </p>
-        );
-      } else if (line.trim() === '') {
-        elements.push(<div key={index} className="h-2" />);
-        inList = false;
-      } else if (/^\d+\./.test(line)) {
-        elements.push(
-          <div key={index} className="flex gap-2 text-dark-300">
-            <span className="text-primary-400 font-medium flex-shrink-0">
-              {line.match(/^\d+/)?.[0]}.
-            </span>
-            <span>{line.replace(/^\d+\.\s*/, '')}</span>
-          </div>
-        );
-      } else {
-        elements.push(
-          <p key={index} className="text-dark-300 leading-relaxed">
-            {line}
-          </p>
-        );
-      }
-    });
-
-    return elements;
-  };
 
   return (
     <div className="min-h-screen bg-dark-900">
@@ -209,9 +140,7 @@ export default function QuestionDetail() {
               </button>
               {showSolution && (
                 <div className="px-6 pb-6 border-t border-dark-700 pt-6 animate-fade-in">
-                  <div className="prose-custom">
-                    {renderMarkdown(question.standardSolution)}
-                  </div>
+                  <Markdown text={question.standardSolution} />
                 </div>
               )}
             </div>

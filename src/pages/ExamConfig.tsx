@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, BookOpen, Target, ChevronRight, Settings } from 'lucide-react';
+import { Clock, BookOpen, Target, ChevronRight, Settings, Check } from 'lucide-react';
 import { categories } from '@/data/categories';
 import { questions } from '@/data/questions';
 import { useExamStore } from '@/store/useExamStore';
@@ -28,21 +28,39 @@ export default function ExamConfigPage() {
   const setConfig = useExamStore((state) => state.setConfig);
   const startExam = useExamStore((state) => state.startExam);
 
-  const [selectedCategory, setSelectedCategory] = useState<string>('java');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['java']);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | 'all'>('all');
   const [questionCount, setQuestionCount] = useState<number>(10);
   const [duration, setDuration] = useState<number>(30);
 
-  const categoryQuestions = questions.filter(q => q.categoryId === selectedCategory);
-  const filteredCount = selectedDifficulty === 'all'
-    ? categoryQuestions.length
-    : categoryQuestions.filter(q => q.difficulty === selectedDifficulty).length;
+  const toggleCategory = (categoryId: string) => {
+    setSelectedCategories((prev) => {
+      if (prev.includes(categoryId)) {
+        return prev.filter((id) => id !== categoryId);
+      }
+      return [...prev, categoryId];
+    });
+  };
+
+  const selectAllCategories = () => {
+    setSelectedCategories(categories.map((c) => c.id));
+  };
+
+  const categoryQuestions = questions.filter((q) =>
+    selectedCategories.includes(q.categoryId)
+  );
+  const filteredCount =
+    selectedDifficulty === 'all'
+      ? categoryQuestions.length
+      : categoryQuestions.filter((q) => q.difficulty === selectedDifficulty).length;
 
   const actualCount = Math.min(questionCount, filteredCount);
 
   const handleStartExam = () => {
+    if (selectedCategories.length === 0 || filteredCount === 0) return;
+
     setConfig({
-      categoryId: selectedCategory,
+      categoryIds: selectedCategories,
       difficulty: selectedDifficulty,
       questionCount: actualCount,
       duration,
@@ -50,6 +68,11 @@ export default function ExamConfigPage() {
     startExam();
     navigate('/exam/take');
   };
+
+  const selectedCategoryNames = selectedCategories
+    .map((id) => categories.find((c) => c.id === id)?.name)
+    .filter(Boolean)
+    .join('、');
 
   return (
     <div className="min-h-screen bg-dark-900 py-12">
@@ -70,47 +93,65 @@ export default function ExamConfigPage() {
 
           <div className="space-y-8">
             <div className="bg-dark-800/50 border border-dark-700 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-primary-500/10 flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-primary-400" />
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary-500/10 flex items-center justify-center">
+                    <BookOpen className="w-5 h-5 text-primary-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">选择分类</h2>
+                    <p className="text-sm text-dark-400">
+                      可选一个或多个技术方向（已选 {selectedCategories.length} 个）
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-white">选择分类</h2>
-                  <p className="text-sm text-dark-400">选择你想要练习的技术方向</p>
-                </div>
+                <button
+                  onClick={selectAllCategories}
+                  className="text-sm text-primary-400 hover:text-primary-300 transition-colors"
+                >
+                  全选
+                </button>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`p-4 rounded-xl border-2 transition-all ${
-                      selectedCategory === category.id
-                        ? 'border-primary-500 bg-primary-500/10'
-                        : 'border-dark-700 bg-dark-900/50 hover:border-dark-600'
-                    }`}
-                  >
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2"
-                      style={{ backgroundColor: `${category.color}20` }}
+                {categories.map((category) => {
+                  const isSelected = selectedCategories.includes(category.id);
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => toggleCategory(category.id)}
+                      className={`relative p-4 rounded-xl border-2 transition-all ${
+                        isSelected
+                          ? 'border-primary-500 bg-primary-500/10'
+                          : 'border-dark-700 bg-dark-900/50 hover:border-dark-600'
+                      }`}
                     >
-                      <span className="text-xl">
-                        {category.id === 'java' && '☕'}
-                        {category.id === 'database' && '🗄️'}
-                        {category.id === 'cache' && '⚡'}
-                        {category.id === 'mq' && '📨'}
-                        {category.id === 'system-design' && '🏗️'}
-                      </span>
-                    </div>
-                    <div className="text-sm font-medium text-white text-center">
-                      {category.name}
-                    </div>
-                    <div className="text-xs text-dark-400 text-center mt-1">
-                      {category.questionCount}道题
-                    </div>
-                  </button>
-                ))}
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2"
+                        style={{ backgroundColor: `${category.color}20` }}
+                      >
+                        <span className="text-xl">
+                          {category.id === 'java' && '☕'}
+                          {category.id === 'database' && '🗄️'}
+                          {category.id === 'cache' && '⚡'}
+                          {category.id === 'mq' && '📨'}
+                          {category.id === 'system-design' && '🏗️'}
+                        </span>
+                      </div>
+                      <div className="text-sm font-medium text-white text-center">
+                        {category.name}
+                      </div>
+                      <div className="text-xs text-dark-400 text-center mt-1">
+                        {category.questionCount}道题
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -219,7 +260,7 @@ export default function ExamConfigPage() {
                   <div className="flex flex-wrap gap-4 text-sm text-dark-300">
                     <span>
                       分类: <span className="text-primary-400 font-medium">
-                        {categories.find(c => c.id === selectedCategory)?.name}
+                        {selectedCategoryNames || '未选择'}
                       </span>
                     </span>
                     <span>
@@ -238,7 +279,7 @@ export default function ExamConfigPage() {
 
                 <button
                   onClick={handleStartExam}
-                  disabled={filteredCount === 0}
+                  disabled={selectedCategories.length === 0 || filteredCount === 0}
                   className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-medium rounded-xl transition-all hover:shadow-lg hover:shadow-primary-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   开始考试
