@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import {
   History,
   Trophy,
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useExamStore } from '@/store/useExamStore';
 import { ExamHistoryRecord } from '@/types';
+import { ExamHistorySkeleton } from '@/components/ExamHistorySkeleton';
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -57,6 +59,14 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
 export default function ExamHistoryPage() {
   const navigate = useNavigate();
   const { history, clearHistory } = useExamStore();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const avgScore = history.length > 0
     ? Math.round(history.reduce((sum, r) => sum + r.score, 0) / history.length)
@@ -77,6 +87,10 @@ export default function ExamHistoryPage() {
   const handleStartExam = () => {
     navigate('/exam/config');
   };
+
+  if (isLoading) {
+    return <ExamHistorySkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-dark-900 py-8">

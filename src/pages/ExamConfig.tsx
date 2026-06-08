@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, BookOpen, Target, ChevronRight, Settings, Check } from 'lucide-react';
 import { categories } from '@/data/categories';
 import { questions } from '@/data/questions';
 import { useExamStore } from '@/store/useExamStore';
 import { Difficulty } from '@/types';
+import { ExamConfigSkeleton } from '@/components/ExamConfigSkeleton';
 
 const difficultyOptions = [
   { value: 'all', label: '全部难度', desc: '随机抽取各种难度题目' },
@@ -27,11 +28,19 @@ export default function ExamConfigPage() {
   const navigate = useNavigate();
   const setConfig = useExamStore((state) => state.setConfig);
   const startExam = useExamStore((state) => state.startExam);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['java']);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | 'all'>('all');
   const [questionCount, setQuestionCount] = useState<number>(10);
   const [duration, setDuration] = useState<number>(30);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) => {
@@ -73,6 +82,10 @@ export default function ExamConfigPage() {
     .map((id) => categories.find((c) => c.id === id)?.name)
     .filter(Boolean)
     .join('、');
+
+  if (isLoading) {
+    return <ExamConfigSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-dark-900 py-12">

@@ -16,6 +16,7 @@ import CodeBlock from '@/components/CodeBlock';
 import PitfallCard from '@/components/PitfallCard';
 import QuestionCard from '@/components/QuestionCard';
 import Markdown from '@/components/Markdown';
+import { QuestionDetailSkeleton } from '@/components/QuestionDetailSkeleton';
 import { questions } from '@/data/questions';
 import { categories } from '@/data/categories';
 import { useLearningPathStore } from '@/store/useLearningPathStore';
@@ -27,7 +28,16 @@ export default function QuestionDetail() {
   const [searchParams] = useSearchParams();
   const [showSolution, setShowSolution] = useState(true);
   const [showPitfalls, setShowPitfalls] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const { completeStep, getNextStep } = useLearningPathStore();
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [questionId]);
 
   const fromLearningPath = searchParams.get('from') === 'learning-path';
   const pathId = searchParams.get('pathId');
@@ -121,6 +131,10 @@ export default function QuestionDetail() {
   }
 
   const difficulty = difficultyConfig[question.difficulty];
+
+  if (isLoading) {
+    return <QuestionDetailSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-dark-900">

@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Coffee,
@@ -23,6 +24,7 @@ import { learningPaths } from '@/data/learningPaths';
 import { useLearningPathStore } from '@/store/useLearningPathStore';
 import { LearningPhase, LearningStep } from '@/types';
 import { cn } from '@/lib/utils';
+import { LearningPathDetailSkeleton } from '@/components/LearningPathDetailSkeleton';
 
 const iconMap: Record<string, React.ReactNode> = {
   coffee: <Coffee className="w-6 h-6" />,
@@ -183,9 +185,18 @@ function PhaseSection({ pathId, phase, phaseIndex, currentStepId, completedStepI
 export default function LearningPathDetail() {
   const { pathId } = useParams<{ pathId: string }>();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
   const path = learningPaths.find(p => p.id === pathId);
   const { getPathProgress, startPath, getCurrentStep, completeStep, setCurrentStep } = useLearningPathStore();
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [pathId]);
 
   if (!path) {
     return (
@@ -248,6 +259,10 @@ export default function LearningPathDetail() {
   if (currentStepId && currentPhaseId) {
     currentPhase = path.phases.find(p => p.id === currentPhaseId) || null;
     currentStep = currentPhase?.steps.find(s => s.id === currentStepId) || null;
+  }
+
+  if (isLoading) {
+    return <LearningPathDetailSkeleton />;
   }
 
   return (

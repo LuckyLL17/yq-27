@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Trophy,
@@ -22,6 +22,7 @@ import { useExamStore } from '@/store/useExamStore';
 import CodeBlock from '@/components/CodeBlock';
 import PitfallCard from '@/components/PitfallCard';
 import Markdown from '@/components/Markdown';
+import { ExamResultSkeleton } from '@/components/ExamResultSkeleton';
 import { ScoreDetail } from '@/types';
 
 function formatTime(seconds: number): string {
@@ -126,10 +127,22 @@ export default function ExamResultPage() {
   const { result, resetExam, config, history } = useExamStore();
   const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
   const [filterType, setFilterType] = useState<'all' | 'correct' | 'wrong' | 'unanswered'>('all');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!result) {
     navigate('/exam/config');
     return null;
+  }
+
+  if (isLoading) {
+    return <ExamResultSkeleton />;
   }
 
   const toggleQuestion = (index: number) => {
