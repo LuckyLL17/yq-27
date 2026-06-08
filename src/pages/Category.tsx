@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Filter, Grid3X3, List } from 'lucide-react';
 import QuestionCard from '@/components/QuestionCard';
+import { QuestionListSkeleton } from '@/components/QuestionCardSkeleton';
 import { categories } from '@/data/categories';
 import { questions } from '@/data/questions';
 import { Difficulty } from '@/types';
@@ -10,6 +11,7 @@ export default function Category() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const [difficulty, setDifficulty] = useState<Difficulty | 'all'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [isLoading, setIsLoading] = useState(true);
 
   const category = categories.find(c => c.id === categoryId);
   
@@ -21,6 +23,14 @@ export default function Category() {
     }
     
     return result;
+  }, [categoryId, difficulty]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+    return () => clearTimeout(timer);
   }, [categoryId, difficulty]);
 
   const difficultyOptions = [
@@ -125,36 +135,40 @@ export default function Category() {
           <div className="flex items-center gap-1 bg-dark-800 rounded-lg p-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded ${
+              className={`p-2 rounded transition-colors ${
                 viewMode === 'grid'
                   ? 'bg-dark-700 text-white'
                   : 'text-dark-400 hover:text-white'
               }`}
+              title="网格视图"
             >
               <Grid3X3 className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded ${
+              className={`p-2 rounded transition-colors ${
                 viewMode === 'list'
                   ? 'bg-dark-700 text-white'
                   : 'text-dark-400 hover:text-white'
               }`}
+              title="列表视图"
             >
               <List className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* 题目列表 */}
-        {filteredQuestions.length > 0 ? (
+        {/* 题目列表或骨架屏 */}
+        {isLoading ? (
+          <QuestionListSkeleton count={9} viewMode={viewMode} />
+        ) : filteredQuestions.length > 0 ? (
           <div className={`grid gap-4 ${
             viewMode === 'grid'
               ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
               : 'grid-cols-1'
           }`}>
             {filteredQuestions.map((question) => (
-              <QuestionCard key={question.id} question={question} />
+              <QuestionCard key={question.id} question={question} viewMode={viewMode} />
             ))}
           </div>
         ) : (

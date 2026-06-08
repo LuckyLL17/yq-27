@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Search as SearchIcon, ArrowLeft } from 'lucide-react';
 import QuestionCard from '@/components/QuestionCard';
+import { QuestionListSkeleton } from '@/components/QuestionCardSkeleton';
 import { questions } from '@/data/questions';
 import { categories } from '@/data/categories';
 
@@ -10,6 +11,7 @@ export default function SearchPage() {
   const navigate = useNavigate();
   const query = searchParams.get('q') || '';
   const [searchInput, setSearchInput] = useState(query);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setSearchInput(query);
@@ -37,6 +39,15 @@ export default function SearchPage() {
             p.description.toLowerCase().includes(lowerQuery)
         )
     );
+  }, [query]);
+
+  useEffect(() => {
+    if (!query.trim()) return;
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [query]);
 
   const highlightText = (text: string, keyword: string) => {
@@ -90,7 +101,9 @@ export default function SearchPage() {
           </div>
         </form>
 
-        {searchResults.length > 0 ? (
+        {isLoading ? (
+          <QuestionListSkeleton count={6} viewMode="grid" />
+        ) : searchResults.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {searchResults.map((question) => {
               const category = categories.find((c) => c.id === question.categoryId);

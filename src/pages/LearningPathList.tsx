@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Coffee,
@@ -18,6 +19,7 @@ import {
 import { learningPaths } from '@/data/learningPaths';
 import { useLearningPathStore } from '@/store/useLearningPathStore';
 import { LearningPath } from '@/types';
+import { PathListSkeleton } from '@/components/PathCardSkeleton';
 
 const iconMap: Record<string, React.ReactNode> = {
   coffee: <Coffee className="w-7 h-7" />,
@@ -180,6 +182,14 @@ function PathCard({ path, progress, isActive, onStart, onContinue, onReset }: Pa
 export default function LearningPathList() {
   const navigate = useNavigate();
   const { startPath, resetPath, getPathProgress, progress } = useLearningPathStore();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleStart = (pathId: string) => {
     startPath(pathId);
@@ -231,23 +241,27 @@ export default function LearningPathList() {
       </section>
 
       <section className="container mx-auto px-4 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {learningPaths.map((path) => {
-            const progress = getPathProgress(path.id);
-            const isActive = isPathActive(path.id);
-            return (
-              <PathCard
-                key={path.id}
-                path={path}
-                progress={progress}
-                isActive={isActive}
-                onStart={() => handleStart(path.id)}
-                onContinue={() => handleContinue(path.id)}
-                onReset={() => handleReset(path.id)}
-              />
-            );
-          })}
-        </div>
+        {isLoading ? (
+          <PathListSkeleton count={3} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {learningPaths.map((path) => {
+              const progress = getPathProgress(path.id);
+              const isActive = isPathActive(path.id);
+              return (
+                <PathCard
+                  key={path.id}
+                  path={path}
+                  progress={progress}
+                  isActive={isActive}
+                  onStart={() => handleStart(path.id)}
+                  onContinue={() => handleContinue(path.id)}
+                  onReset={() => handleReset(path.id)}
+                />
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );
