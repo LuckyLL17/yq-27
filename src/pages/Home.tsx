@@ -17,11 +17,18 @@ const iconMap: Record<string, React.ReactNode> = {
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-  const { getPathProgress, activePathId } = useLearningPathStore();
+  const { getPathProgress, progress } = useLearningPathStore();
 
   const hotQuestions = questions.filter(q => q.isHot).slice(0, 6);
   const totalQuestions = questions.length;
   const totalPitfalls = questions.reduce((sum, q) => sum + q.pitfalls.length, 0);
+
+  const isPathActive = (pathId: string) => {
+    const pathProgress = progress[pathId];
+    if (!pathProgress || !pathProgress.startedAt) return false;
+    const progressPercent = getPathProgress(pathId);
+    return progressPercent > 0 && progressPercent < 100;
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,8 +186,8 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {learningPaths.slice(0, 3).map((path) => {
-            const progress = getPathProgress(path.id);
-            const isActive = activePathId === path.id;
+            const pathProgress = getPathProgress(path.id);
+            const isActive = isPathActive(path.id);
             return (
               <div
                 key={path.id}
@@ -218,12 +225,12 @@ export default function Home() {
                         {path.totalQuestions}题
                       </span>
                     </div>
-                    <div className="text-sm font-semibold text-white">{progress}%</div>
+                    <div className="text-sm font-semibold text-white">{pathProgress}%</div>
                   </div>
                   <div className="mt-3 h-2 bg-dark-900 rounded-full overflow-hidden">
                     <div
                       className={`h-full bg-gradient-to-r ${path.gradient} rounded-full transition-all duration-500`}
-                      style={{ width: `${progress}%` }}
+                      style={{ width: `${pathProgress}%` }}
                     />
                   </div>
                 </div>

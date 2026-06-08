@@ -173,7 +173,7 @@ function PathCard({ path, progress, isActive, onStart, onContinue, onReset }: Pa
 
 export default function LearningPathList() {
   const navigate = useNavigate();
-  const { startPath, resetPath, getPathProgress, activePathId } = useLearningPathStore();
+  const { startPath, resetPath, getPathProgress, progress } = useLearningPathStore();
 
   const handleStart = (pathId: string) => {
     startPath(pathId);
@@ -188,6 +188,13 @@ export default function LearningPathList() {
     if (window.confirm('确定要重置该学习路线的进度吗？此操作不可撤销。')) {
       resetPath(pathId);
     }
+  };
+
+  const isPathActive = (pathId: string) => {
+    const pathProgress = progress[pathId];
+    if (!pathProgress || !pathProgress.startedAt) return false;
+    const progressPercent = getPathProgress(pathId);
+    return progressPercent > 0 && progressPercent < 100;
   };
 
   return (
@@ -221,7 +228,7 @@ export default function LearningPathList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {learningPaths.map((path) => {
             const progress = getPathProgress(path.id);
-            const isActive = activePathId === path.id;
+            const isActive = isPathActive(path.id);
             return (
               <PathCard
                 key={path.id}

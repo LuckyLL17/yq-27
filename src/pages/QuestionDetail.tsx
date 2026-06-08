@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   ChevronRight,
@@ -9,6 +9,8 @@ import {
   Flame,
   ChevronDown,
   ChevronUp,
+  Check,
+  Route,
 } from 'lucide-react';
 import CodeBlock from '@/components/CodeBlock';
 import PitfallCard from '@/components/PitfallCard';
@@ -16,12 +18,25 @@ import QuestionCard from '@/components/QuestionCard';
 import Markdown from '@/components/Markdown';
 import { questions } from '@/data/questions';
 import { categories } from '@/data/categories';
+import { useLearningPathStore } from '@/store/useLearningPathStore';
+import { learningPaths } from '@/data/learningPaths';
 
 export default function QuestionDetail() {
   const { questionId } = useParams<{ questionId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showSolution, setShowSolution] = useState(true);
   const [showPitfalls, setShowPitfalls] = useState(true);
+  const { completeStep, getNextStep } = useLearningPathStore();
+
+  const fromLearningPath = searchParams.get('from') === 'learning-path';
+  const pathId = searchParams.get('pathId');
+  const stepId = searchParams.get('stepId');
+
+  const isStepCompleted = useLearningPathStore((state) => {
+    if (!pathId || !stepId) return false;
+    return state.progress[pathId]?.completedStepIds.includes(stepId) || false;
+  });
 
   const question = questions.find((q) => q.id === questionId);
   const category = categories.find((c) => c.id === question?.categoryId);
@@ -37,6 +52,56 @@ export default function QuestionDetail() {
   const prevQuestion = currentIndex > 0 ? questions[currentIndex - 1] : null;
   const nextQuestion =
     currentIndex < questions.length - 1 ? questions[currentIndex + 1] : null;
+
+  const currentPath = pathId ? learningPaths.find(p => p.id === pathId) : null;
+
+  useEffect(() => {
+    if (fromLearningPath && pathId && stepId) {
+      const progress = useLearningPathStore.getState().progress[pathId];
+      if (progress && !progress.completedStepIds.includes(stepId)) {
+        const timer = setTimeout(() => {
+          completeStep(pathId, stepId);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [fromLearningPath, pathId, stepId, completeStep]);
+
+  const handleMarkComplete = () => {
+    if (pathId && stepId) {
+      completeStep(pathId, stepId);
+    }
+  };
+
+  const handleNextStep = () => {
+    if (pathId && stepId) {
+      completeStep(pathId, stepId);
+      const nextStepInfo = getNextStep(pathId);
+      if (nextStepInfo) {
+        const path = learningPaths.find(p => p.id === pathId);
+        if (path) {
+          const phase = path.phases.find(p => p.id === nextStepInfo.phaseId);
+          const step = phase?.steps.find(s => s.id === nextStepInfo.stepId);
+          if (step && step.type === 'question') {
+            navigate(`/question/${step.targetId}?from=learning-path&pathId=${pathId}&stepId=${step.id}`);
+            return;
+          } else if (step && step.type === 'category') {
+            navigate(`/category/${step.targetId}?from=learning-path&pathId=${pathId}`);
+            return;
+          } else if (step && step.type === 'exam') {
+            navigate(`/exam/config?from=learning-path&pathId=${pathId}&stepId=${step.id}`);
+            return;
+          }
+        }
+      } else {
+        navigate(`/learning-path/${pathId}`);
+        return;
+      }
+    }
+    if (nextQuestion) {
+      navigate(`/question/${nextQuestion.id}`);
+    }
+  };
 
   const difficultyConfig = {
     easy: { label: '简单', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
@@ -69,13 +134,28 @@ export default function QuestionDetail() {
             <ArrowLeft className="w-4 h-4" />
             返回
           </button>
-          <ChevronRight className="w-4 h-4 text-dark-600" />
-          <Link
-            to={`/category/${category?.id}`}
-            className="text-dark-400 hover:text-white transition-colors"
-          >
-            {category?.name}
-          </Link>
+          {fromLearningPath && currentPath ? (
+            <>
+              <ChevronRight className="w-4 h-4 text-dark-600" />
+              <Link
+                to={`/learning-path/${pathId}`}
+                className="text-dark-400 hover:text-primary-400 transition-colors flex items-center gap-1"
+              >
+                <Route className="w-4 h-4" />
+                {currentPath.title}
+              </Link>
+            </>
+          ) : (
+            <>
+              <ChevronRight className="w-4 h-4 text-dark-600" />
+              <Link
+                to={`/category/${category?.id}`}
+                className="text-dark-400 hover:text-white transition-colors"
+              >
+                {category?.name}
+              </Link>
+            </>
+          )}
           <ChevronRight className="w-4 h-4 text-dark-600" />
           <span className="text-dark-300 truncate max-w-xs">
             {question.title}
@@ -208,6 +288,40 @@ export default function QuestionDetail() {
                 </div>
               )}
             </div>
+
+            {fromLearningPath && (
+              <div className="bg-gradient-to-r from-primary-600/20 via-primary-500/10 to-cyan-500/20 border border-primary-500/30 rounded-2xl p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-cyan-500 flex items-center justify-center">
+                      <Route className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-sm text-dark-400">学习路线 · {currentPath?.title}</div>
+                      <div className="text-white font-medium">
+                        {isStepCompleted ? '✓ 已完成本步骤' : '正在学习本步骤'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleMarkComplete}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-400 font-medium rounded-xl hover:bg-green-500/30 transition-colors border border-green-500/30"
+                    >
+                      <Check className="w-4 h-4" />
+                      标记完成
+                    </button>
+                    <button
+                      onClick={handleNextStep}
+                      className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-primary-500 to-cyan-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-primary-500/25 transition-all"
+                    >
+                      下一步
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* 上一题/下一题 */}
             <div className="flex items-center justify-between gap-4">

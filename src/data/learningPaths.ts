@@ -10,8 +10,8 @@ export const learningPaths: LearningPath[] = [
     color: '#f89820',
     gradient: 'from-orange-500 to-amber-500',
     level: 'beginner',
-    estimatedDays: 30,
-    totalQuestions: 25,
+    estimatedDays: 15,
+    totalQuestions: 5,
     phases: [
       {
         id: 'java-phase-1',
@@ -51,10 +51,10 @@ export const learningPaths: LearningPath[] = [
         steps: [
           {
             id: 'java-step-2-1',
-            title: '线程池的实现原理',
+            title: '线程池的核心参数',
             description: '掌握线程池的核心参数和工作机制',
             type: 'question',
-            targetId: 'java-3',
+            targetId: 'java-5',
             durationMinutes: 30,
           },
           {
@@ -62,12 +62,12 @@ export const learningPaths: LearningPath[] = [
             title: 'synchronized 与 ReentrantLock',
             description: '深入理解锁的实现和使用场景',
             type: 'question',
-            targetId: 'java-4',
+            targetId: 'java-3',
             durationMinutes: 35,
           },
           {
             id: 'java-step-2-3',
-            title: '并发编程综合练习',
+            title: '并发编程综合测评',
             description: '检验并发编程的学习成果',
             type: 'exam',
             targetId: 'java-concurrency-exam',
@@ -82,19 +82,19 @@ export const learningPaths: LearningPath[] = [
         steps: [
           {
             id: 'java-step-3-1',
-            title: 'JVM 内存模型',
-            description: '理解 JVM 内存区域划分',
+            title: 'Java 内存模型（JMM）',
+            description: '理解 JMM 内存模型与并发',
             type: 'question',
-            targetId: 'java-5',
+            targetId: 'java-4',
             durationMinutes: 30,
           },
           {
             id: 'java-step-3-2',
-            title: '垃圾回收机制',
-            description: '掌握常见垃圾回收算法和收集器',
-            type: 'question',
-            targetId: 'java-6',
-            durationMinutes: 40,
+            title: 'Java 综合学习',
+            description: '巩固所有 Java 面试题',
+            type: 'category',
+            targetId: 'java',
+            durationMinutes: 60,
           },
           {
             id: 'java-step-3-3',
@@ -117,8 +117,8 @@ export const learningPaths: LearningPath[] = [
     color: '#00758f',
     gradient: 'from-cyan-500 to-teal-500',
     level: 'intermediate',
-    estimatedDays: 20,
-    totalQuestions: 20,
+    estimatedDays: 10,
+    totalQuestions: 5,
     phases: [
       {
         id: 'db-phase-1',
@@ -127,7 +127,7 @@ export const learningPaths: LearningPath[] = [
         steps: [
           {
             id: 'db-step-1-1',
-            title: 'B+ 树索引原理',
+            title: 'MySQL 索引的底层数据结构',
             description: '深入理解 B+ 树的数据结构和优势',
             type: 'question',
             targetId: 'db-1',
@@ -135,8 +135,8 @@ export const learningPaths: LearningPath[] = [
           },
           {
             id: 'db-step-1-2',
-            title: '索引失效场景分析',
-            description: '了解常见的索引失效场景及规避方法',
+            title: '事务的 ACID 特性',
+            description: '了解事务四大特性及实现原理',
             type: 'question',
             targetId: 'db-2',
             durationMinutes: 30,
@@ -169,7 +169,7 @@ export const learningPaths: LearningPath[] = [
             title: 'MVCC 实现原理',
             description: '深入理解多版本并发控制',
             type: 'question',
-            targetId: 'db-4',
+            targetId: 'db-5',
             durationMinutes: 35,
           },
           {
@@ -189,19 +189,19 @@ export const learningPaths: LearningPath[] = [
         steps: [
           {
             id: 'db-step-3-1',
-            title: 'SQL 执行计划分析',
-            description: '学会使用 EXPLAIN 分析 SQL',
+            title: '死锁排查与避免',
+            description: '学会死锁的排查和避免策略',
             type: 'question',
-            targetId: 'db-5',
+            targetId: 'db-4',
             durationMinutes: 30,
           },
           {
             id: 'db-step-3-2',
-            title: '慢查询优化实战',
-            description: '掌握慢查询定位和优化方法',
-            type: 'question',
-            targetId: 'db-6',
-            durationMinutes: 40,
+            title: '数据库综合学习',
+            description: '巩固所有数据库面试题',
+            type: 'category',
+            targetId: 'database',
+            durationMinutes: 60,
           },
           {
             id: 'db-step-3-3',
@@ -224,8 +224,8 @@ export const learningPaths: LearningPath[] = [
     color: '#dc382d',
     gradient: 'from-red-500 to-orange-500',
     level: 'advanced',
-    estimatedDays: 15,
-    totalQuestions: 30,
+    estimatedDays: 12,
+    totalQuestions: 13,
     phases: [
       {
         id: 'cache-phase-1',
@@ -234,16 +234,16 @@ export const learningPaths: LearningPath[] = [
         steps: [
           {
             id: 'cache-step-1-1',
-            title: 'Redis 数据结构',
-            description: '深入理解 Redis 的五种核心数据结构',
+            title: '缓存穿透/击穿/雪崩',
+            description: '掌握缓存三大问题及解决方案',
             type: 'question',
             targetId: 'cache-1',
             durationMinutes: 25,
           },
           {
             id: 'cache-step-1-2',
-            title: '缓存穿透/击穿/雪崩',
-            description: '掌握缓存三大问题及解决方案',
+            title: '缓存与数据库一致性',
+            description: '理解缓存一致性的保证方案',
             type: 'question',
             targetId: 'cache-2',
             durationMinutes: 35,
@@ -265,8 +265,8 @@ export const learningPaths: LearningPath[] = [
         steps: [
           {
             id: 'mq-step-2-1',
-            title: 'Kafka 架构设计',
-            description: '理解 Kafka 的分布式架构',
+            title: '消息队列的作用',
+            description: '理解为什么要用消息队列',
             type: 'question',
             targetId: 'mq-1',
             durationMinutes: 30,
@@ -296,18 +296,18 @@ export const learningPaths: LearningPath[] = [
         steps: [
           {
             id: 'system-step-3-1',
-            title: '高可用架构设计',
-            description: '掌握高可用系统的设计原则',
+            title: '秒杀系统设计',
+            description: '学习秒杀系统的完整设计方案',
             type: 'question',
-            targetId: 'system-1',
+            targetId: 'sd-1',
             durationMinutes: 40,
           },
           {
             id: 'system-step-3-2',
-            title: '秒杀系统设计',
-            description: '学习秒杀系统的完整设计方案',
+            title: '高可用分布式系统设计',
+            description: '掌握高可用系统的设计原则',
             type: 'question',
-            targetId: 'system-2',
+            targetId: 'sd-3',
             durationMinutes: 50,
           },
           {
